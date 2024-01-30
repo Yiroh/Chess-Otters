@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Chessboard : MonoBehaviour
@@ -6,8 +8,11 @@ public class Chessboard : MonoBehaviour
     [SerializeField] private Material tileMaterial;
     [SerializeField] private Material hoverMaterial;
     [SerializeField] private float tileSize = 1.0f;
-    [SerializeField] private float yOffset = 0.2f;
+    [SerializeField] private float yOffset = 0.15f;
     [SerializeField] private Vector3 boardCenter = Vector3.zero;
+    [SerializeField] private float deadSize = 0.45f;
+    [SerializeField] private float deadSpacing = 0.55f;
+    [SerializeField] private float dragOffset = 1f;
 
     [Header("Prefabs & Materials")]
     [SerializeField] private GameObject[] prefabs;
@@ -15,6 +20,9 @@ public class Chessboard : MonoBehaviour
 
     // LOGIC
     private ChessPiece[,] chessPieces; // All active pieces on the board.
+    private ChessPiece currentlyDragging;
+    private List<ChessPiece> deadBlueTeam = new List<ChessPiece>();
+    private List<ChessPiece> deadRedTeam = new List<ChessPiece>();
     private const int tileCountX = 8;
     private const int tileCountY = 8;
     private GameObject[,] tiles;
@@ -66,6 +74,36 @@ public class Chessboard : MonoBehaviour
                 tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>().material = hoverMaterial;
                 tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
             }
+
+            // if left mouse click
+            if(Input.GetMouseButtonDown(0))
+            {
+                // If there is a chess piece at the location
+                if(chessPieces[hitPosition.x, hitPosition.y] != null)
+                {
+                    //Is it our turn?
+                    if (true)
+                    {
+                        currentlyDragging = chessPieces[hitPosition.x, hitPosition.y];
+                    }
+                }
+            }
+
+            // if left mouse released
+            if(currentlyDragging != null && Input.GetMouseButtonUp(0))
+            {
+                Vector2Int previousPosition = new Vector2Int(currentlyDragging.currentX, currentlyDragging.currentY);
+
+                bool validMove = MoveTo(currentlyDragging, hitPosition.x, hitPosition.y);
+                if(!validMove)
+                {
+                    currentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
+                    currentlyDragging = null;
+                } else {
+
+                    currentlyDragging = null;
+                }
+            }
         }
         else
         {
@@ -75,6 +113,23 @@ public class Chessboard : MonoBehaviour
                 tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
                 tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>().material = tileMaterial;
                 currentHover = -Vector2Int.one;
+            }
+
+            if(currentlyDragging != null && Input.GetMouseButtonUp(0))
+            {
+                currentlyDragging.SetPosition(GetTileCenter(currentlyDragging.currentX, currentlyDragging.currentY));
+                currentlyDragging = null;
+            }
+        }
+        
+        // If dragging a piece
+        if(currentlyDragging)
+        {
+            Plane horizontalPlane = new Plane(Vector3.up, Vector3.up * yOffset);
+            float distance = 0.0f;
+            if(horizontalPlane.Raycast(ray, out distance))
+            {
+                currentlyDragging.SetPosition(ray.GetPoint(distance) + Vector3.up * dragOffset);
             }
         }
     }
@@ -202,7 +257,7 @@ public class Chessboard : MonoBehaviour
     {
         chessPieces[x, y].currentX = x;
         chessPieces[x, y].currentY = y;
-        chessPieces[x, y].transform.position = GetTileCenter(x, y);
+        chessPieces[x, y].SetPosition(GetTileCenter(x, y), force);
     }
     private Vector3 GetTileCenter(int x, int y)
     {
@@ -211,6 +266,50 @@ public class Chessboard : MonoBehaviour
 
 
     // Helper Functions / Operations
+    private bool MoveTo(ChessPiece cp, int x, int y)
+    {
+        Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
+
+        // is there another piece on top of where we want to go?
+        if (chessPieces[x,y] != null)
+        {
+            ChessPiece ocp = chessPieces[x, y];
+
+            if (cp.team == ocp.team)
+            {
+                return false;
+            } else {
+                // if moving on top of an enemy team's piece:
+                if(ocp.team == 0)
+                {
+                    // Blue Team piece
+                    deadBlueTeam.Add(ocp);
+                    ocp.SetScale(Vector3.one * deadSize);
+                    ocp.SetPosition(
+                        new Vector3(8 * tileSize, yOffset/2, -1 * tileSize) - bounds + 
+                        new Vector3(tileSize / 3, 0, tileSize / 2) + 
+                        (Vector3.forward * deadSpacing) * deadBlueTeam.Count);
+                }
+                else 
+                {
+                    //Red Team piece
+                    deadRedTeam.Add(ocp);
+                    ocp.SetScale(Vector3.one * deadSize);
+                    ocp.SetPosition(
+                        new Vector3(-1 * tileSize, yOffset/2, 8 * tileSize) - bounds + 
+                        new Vector3((tileSize * 2)/3, 0, tileSize/2) + 
+                        (Vector3.back * deadSpacing) * deadRedTeam.Count);
+                }
+            }
+        }
+
+        chessPieces[x, y] = cp;
+        chessPieces[previousPosition.x, previousPosition.y] = null;
+
+        PositionSinglePiece(x, y);
+
+        return true;
+    }
     private Vector2Int LookupTileIndex(GameObject hitInfo)
     {
         for (int x = 0; x < tileCountX; x++)

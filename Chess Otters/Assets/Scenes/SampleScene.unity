@@ -148,8 +148,11 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: c191bd7240b7e744690e8442fec509de, type: 2}
   hoverMaterial: {fileID: 2100000, guid: 4417c83ed17dd674fa2c1ba2627e5753, type: 2}
   tileSize: 1
-  yOffset: 1.0001
+  yOffset: 1.2
   boardCenter: {x: 0, y: 0, z: 0}
+  deadSize: 0.45
+  deadSpacing: 0.55
+  dragOffset: 1
   prefabs:
   - {fileID: 7579660288595334768, guid: 7a38db1659809764c98143912eb3a7aa, type: 3}
   - {fileID: 5195083335397890239, guid: 4b0cdaf941eeff54b8fc7772e4816699, type: 3}
