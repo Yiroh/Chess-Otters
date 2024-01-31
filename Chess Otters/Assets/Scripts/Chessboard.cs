@@ -31,12 +31,14 @@ public class Chessboard : MonoBehaviour
     private Camera currentCamera;
     private Vector2Int currentHover;
     private Vector3 bounds;
+    private bool isBlueTurn;
 
     private void Awake()
     {
         GenerateAllTiles(tileSize, tileCountX, tileCountY);
         SpawnAllPieces();
         PositionAllPieces();
+        isBlueTurn = true;
     }
 
 
@@ -85,7 +87,7 @@ public class Chessboard : MonoBehaviour
                 if(chessPieces[hitPosition.x, hitPosition.y] != null)
                 {
                     //Is it our turn?
-                    if (true)
+                    if ((chessPieces[hitPosition.x, hitPosition.y].team == 0 && isBlueTurn) || (chessPieces[hitPosition.x, hitPosition.y].team == 1 && !isBlueTurn))
                     {
                         currentlyDragging = chessPieces[hitPosition.x, hitPosition.y];
                         
@@ -350,6 +352,8 @@ public class Chessboard : MonoBehaviour
         chessPieces[previousPosition.x, previousPosition.y] = null;
 
         PositionSinglePiece(x, y);
+
+        isBlueTurn = !isBlueTurn;
 
         return true;
     }

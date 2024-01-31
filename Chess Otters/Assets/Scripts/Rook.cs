@@ -62,7 +62,7 @@ public class Rook : ChessPiece
             }
         }
 
-        // Left
+        // Right
         for(int i = currentX + 1; i < tileCountX; i++ )
         {
             if(board[i, currentY] == null)
