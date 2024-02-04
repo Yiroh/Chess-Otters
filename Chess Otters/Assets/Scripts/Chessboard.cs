@@ -14,6 +14,7 @@ public class Chessboard : MonoBehaviour
     [SerializeField] private float deadSize = 0.45f;
     [SerializeField] private float deadSpacing = 0.55f;
     [SerializeField] private float dragOffset = 1f;
+    [SerializeField] private GameObject victoryScreen;
 
     [Header("Prefabs & Materials")]
     [SerializeField] private GameObject[] prefabs;
@@ -294,6 +295,62 @@ public class Chessboard : MonoBehaviour
     }
 
 
+    // CheckMate
+    private void CheckMate (int team)
+    {
+        DisplayVictory(team);
+    }
+    private void DisplayVictory (int winningTeam)
+    {
+        victoryScreen.SetActive(true);
+        victoryScreen.transform.GetChild(winningTeam).gameObject.SetActive(true);
+    }
+    public void OnResetButton()
+    {
+        // Reset UI
+        victoryScreen.transform.GetChild(0).gameObject.SetActive(false);
+        victoryScreen.transform.GetChild(1).gameObject.SetActive(false);
+        victoryScreen.SetActive(false);
+
+        // Field Reset
+        currentlyDragging = null;
+        availableMoves.Clear();
+
+        // Clean up Chess Pieces
+        for (int x = 0; x < tileCountX; x++)
+        {
+            for (int y = 0; y < tileCountY; y++)
+            {
+                if(chessPieces[x, y] != null)
+                {
+                    Destroy(chessPieces[x,y].gameObject);
+                }
+
+                chessPieces[x, y] = null;
+            }
+        }
+        // Destroy dead pieces too
+        for (int i = 0; i < deadBlueTeam.Count; i++)
+        {
+            Destroy(deadBlueTeam[i].gameObject);
+        }
+        for (int i = 0; i < deadRedTeam.Count; i++)
+        {
+            Destroy(deadRedTeam[i].gameObject);
+        }
+        deadBlueTeam.Clear();
+        deadRedTeam.Clear();
+
+        SpawnAllPieces();
+        PositionAllPieces();
+        isBlueTurn = true;
+    }
+    public void OnExitButton()
+    {
+        Application.Quit();
+    }
+
+
     // Helper Functions / Operations
     private bool ContainsValidMove(ref List<Vector2Int> moves, Vector2 pos)
     {
@@ -327,6 +384,13 @@ public class Chessboard : MonoBehaviour
                 // if moving on top of an enemy team's piece:
                 if(ocp.team == 0)
                 {
+
+                    // If Blue King
+                    if(ocp.type == ChessPieceType.King)
+                    {
+                        CheckMate(1);
+                    }
+
                     // Blue Team piece
                     deadBlueTeam.Add(ocp);
                     ocp.SetScale(Vector3.one * deadSize);
@@ -337,6 +401,13 @@ public class Chessboard : MonoBehaviour
                 }
                 else 
                 {
+
+                    // If Red King
+                    if(ocp.type == ChessPieceType.King)
+                    {
+                        CheckMate(0);
+                    }
+
                     //Red Team piece
                     deadRedTeam.Add(ocp);
                     ocp.SetScale(Vector3.one * deadSize);
