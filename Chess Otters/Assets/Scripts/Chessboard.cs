@@ -400,7 +400,7 @@ public class Chessboard : MonoBehaviour
             }
         }
 
-        if(specialMove == SpecialMove.Castling)
+        if(specialMove == SpecialMove.Promotion)
         {
             Vector2Int[] lastMove = moveList[moveList.Count - 1];
             ChessPiece targetPawn = chessPieces[lastMove[1].x, lastMove[1].y];
