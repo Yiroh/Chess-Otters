@@ -399,6 +399,83 @@ public class Chessboard : MonoBehaviour
                 }
             }
         }
+
+        if(specialMove == SpecialMove.Castling)
+        {
+            Vector2Int[] lastMove = moveList[moveList.Count - 1];
+            ChessPiece targetPawn = chessPieces[lastMove[1].x, lastMove[1].y];
+
+            // Extra check, might not need this since Promoting is Pawn only.
+            if(targetPawn.type == ChessPieceType.Pawn)
+            {
+                if(targetPawn.team == 0 && lastMove[1].y == 7)
+                {
+                    Debug.Log("Queen Spawning...");
+                    ChessPiece newQueen = SpawnSinglePiece(ChessPieceType.Queen, 0);
+                    newQueen.transform.position = chessPieces[lastMove[1].x, lastMove[1].y].transform.position;
+                    Destroy(chessPieces[lastMove[1].x, lastMove[1].y].gameObject);
+                    chessPieces[lastMove[1].x, lastMove[1].y] = newQueen;
+                    PositionSinglePiece(lastMove[1].x, lastMove[1].y, true);
+                    Debug.Log("Queen Spawned for Blue Team...");
+                }
+                if(targetPawn.team == 1 && lastMove[1].y == 0)
+                {
+                    Debug.Log("Queen Spawning...");
+                    ChessPiece newQueen = SpawnSinglePiece(ChessPieceType.Queen, 1);
+                    newQueen.transform.position = chessPieces[lastMove[1].x, lastMove[1].y].transform.position;
+                    Destroy(chessPieces[lastMove[1].x, lastMove[1].y].gameObject);
+                    chessPieces[lastMove[1].x, lastMove[1].y] = newQueen;
+                    PositionSinglePiece(lastMove[1].x, lastMove[1].y, true);
+                    Debug.Log("Queen Spawned for Red Team...");
+                }
+            }
+        }
+
+        if(specialMove == SpecialMove.Castling)
+        {
+            Vector2Int[] lastMove = moveList[moveList.Count - 1];
+
+            // Left Rook
+            if(lastMove[1].x == 2)
+            {
+                // Blue Team
+                if(lastMove[1].y == 0)
+                {
+                    ChessPiece rook = chessPieces[0, 0];
+                    chessPieces[3, 0] = rook;
+                    PositionSinglePiece(3, 0);
+                    chessPieces[0, 0] = null; 
+                }
+                // Red Team
+                else if(lastMove[1].y == 7)
+                {
+                    ChessPiece rook = chessPieces[0, 7];
+                    chessPieces[3, 7] = rook;
+                    PositionSinglePiece(3, 7);
+                    chessPieces[0, 7] = null;
+                }
+            }
+            // Right Rook
+            else if(lastMove[1].x == 6)
+            {
+                // Blue Team
+                if(lastMove[1].y == 0)
+                {
+                    ChessPiece rook = chessPieces[7, 0];
+                    chessPieces[5, 0] = rook;
+                    PositionSinglePiece(5, 0);
+                    chessPieces[7, 0] = null; 
+                }
+                // Red Team
+                else if(lastMove[1].y == 7)
+                {
+                    ChessPiece rook = chessPieces[7, 7];
+                    chessPieces[5, 7] = rook;
+                    PositionSinglePiece(5, 7);
+                    chessPieces[7, 7] = null;
+                }
+            }
+        }
     }
 
 
