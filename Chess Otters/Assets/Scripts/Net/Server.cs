@@ -141,7 +141,7 @@ public class Server : MonoBehaviour
             }
         }
     }
-    private void SendToClient(NetworkConnection connection, NetMessage msg)
+    public void SendToClient(NetworkConnection connection, NetMessage msg)
     {
         // Sends message to a single client
         DataStreamWriter writer;
