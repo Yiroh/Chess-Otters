@@ -28,6 +28,9 @@ public class Chessboard : MonoBehaviour
     [SerializeField] private Transform rematchIndicator;
     [SerializeField] private Button rematchButton;
 
+    [Header("Music and SFX")]
+    [SerializeField] private AudioClip pieceMoveSFX;
+
     [Header("Prefabs & Materials")]
     [SerializeField] private GameObject[] prefabs;
     [SerializeField] private Material[] teamMaterials;
@@ -773,6 +776,7 @@ public class Chessboard : MonoBehaviour
             }
         }
 
+        AudioManager.Instance.PlaySFX(pieceMoveSFX);
         chessPieces[x, y] = cp;
         chessPieces[previousPosition.x, previousPosition.y] = null;
 

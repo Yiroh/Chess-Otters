@@ -16,9 +16,15 @@ public class GameUI : MonoBehaviour
     public Server server;
     public Client client;
 
+    [Header("UI and Cameras")]
     [SerializeField] private Animator menuAnimator;
     [SerializeField] private TMP_InputField addressInput;
     [SerializeField] private GameObject[] cameraAngles;
+
+    [Header("Music")]
+    [SerializeField] private AudioClip buttonClickSFX;
+    [SerializeField] private AudioClip music1;
+    [SerializeField] private AudioClip music2;
 
     public Action<bool> SetLocalGame;
 
@@ -42,6 +48,7 @@ public class GameUI : MonoBehaviour
     // Buttons
     public void OnLocalGameButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         menuAnimator.SetTrigger("InGameMenu");
         SetLocalGame?.Invoke(true);
         server.Init(8007);
@@ -49,11 +56,13 @@ public class GameUI : MonoBehaviour
     }
     public void OnOnlineGameButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         menuAnimator.SetTrigger("OnlineMenu");
     }
 
     public void OnOnlineHostButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         SetLocalGame?.Invoke(false);
         server.Init(8007);
         client.Init("127.0.0.1", 8007);
@@ -61,16 +70,19 @@ public class GameUI : MonoBehaviour
     }
     public void OnOnlineConnectButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         SetLocalGame?.Invoke(false);
         client.Init(addressInput.text, 8007);
     }
     public void OnOnlineBackButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         menuAnimator.SetTrigger("StartMenu");
     }
 
     public void OnHostBackButton()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         menuAnimator.SetTrigger("OnlineMenu");
         server.Shutdown();
         client.Shutdown();
@@ -78,6 +90,7 @@ public class GameUI : MonoBehaviour
 
     public void OnLeaveFromGameMenu()
     {
+        AudioManager.Instance.PlaySFX(buttonClickSFX);
         ChangeCamera(CameraAngle.menu);
         menuAnimator.SetTrigger("StartMenu");
     }
@@ -94,6 +107,7 @@ public class GameUI : MonoBehaviour
 
     private void OnStartGameClient(NetMessage obj)
     {
+        AudioManager.Instance.PlayMusic(music1);
         menuAnimator.SetTrigger("InGameMenu");
     }
     #endregion
